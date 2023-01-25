@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  create:
+    tags:
+      - '*'
+
+jobs:
+  split-upm:
+    name: update upm branch
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+    - name: update upm branch
+      run: |
+        echo '### head info'
+        git log -1
+        echo '### set git user info'
+        git config user.email "locus84@gmail.com"
+        git config user.name "automation"
+        echo "## replacing version ${GITHUB_REF##*/}"
+        git checkout master
+        sed -i 's|\(\"version"\): "\(.*\)"|\1: '"\"${GITHUB_REF##*/}\"|" $PACKAGE_MANIFEST
+        git add -A
+        git commit -m "tagging version"
+        git push
+        echo '### copy samples'
+        cp -R "$SAMPLE_SOURCE" "$SAMPLE_DEST"
+        git add -A
+        git commit -m "CopySamples"
+        echo '### split upm branch'
+        git subtree split -P "$PKG_ROOT" -b upm
+        echo '### update remote upm branch'
+        git push -f origin upm
+        git checkout upm
+        git tag "upm${GITHUB_REF##*/}"
+        git push origin "upm${GITHUB_REF##*/}"
+      env:
+        PKG_ROOT: Packages/PresetStyle
+        SAMPLE_SOURCE: Assets/Sample
+        SAMPLE_DEST: Packages/PresetStyle/Samples~
+        PACKAGE_MANIFEST: Packages/PresetStyle/package.json

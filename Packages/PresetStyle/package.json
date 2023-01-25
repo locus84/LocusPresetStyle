@@ -1,0 +1,25 @@
+{
+  "name": "com.locus.presetstyle",
+  "displayName": "Preset Style",
+  "version": "0.1.0",
+  "description": "Define css-like style using unity Preset functionality",
+  "unity": "2020.3",
+  "keywords": [
+    "preset",
+    "style",
+    "ui",
+    "ugui"
+  ],
+  "author": {
+    "name": "Locus",
+    "email": "spec_oops@naver.com",
+    "url": "https://github.com/locus84"
+  },
+  "samples": [
+    {
+      "displayName": "Samples",
+      "description": "Samples for getting started",
+      "path": "Samples~/GettingStarted"
+    }
+  ]
+}
