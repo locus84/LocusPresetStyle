@@ -58,7 +58,7 @@ namespace PresetStyle
                 {
                     var info = trackInfo.Value[i];
                     GUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField($"{nameof(TrackInfo.Match)} : {info.Match}", GUILayout.MinWidth(10));
+                    EditorGUILayout.LabelField($"{info.Order} - {nameof(TrackInfo.Match)} : {info.Match}", GUILayout.MinWidth(10));
                     EditorGUILayout.ObjectField(info.Sheet, info.Sheet.GetType(), false);
                     EditorGUILayout.ObjectField(info.Preset, info.Preset.GetType(), false);
                     GUILayout.EndHorizontal();
