@@ -19,10 +19,13 @@ jobs:
         run: choco install -y docfx
 
       - name: Use README.md as index.md
-        run: cp README.md Docs/index.md
+        run: |
+          mkdir -p Docs
+          cp README.md Docs/index.md
 
       - name: Build
         run: docfx Docs/docfx.json
+          
 
       # Upload the generated documentation
       - name: Upload site artifact
