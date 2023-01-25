@@ -240,13 +240,19 @@ namespace PresetStyle
             public PresetStyleSheet Sheet;
             public string Match;
             public Preset Preset;
+            public int Order;
+        }
+
+        public class TrackInfoComparer : IComparer<TrackInfo>
+        {
+            public int Compare(TrackInfo x, TrackInfo y) => x.Order.CompareTo(y.Order);
         }
 
         public class PresetSheetContext
         {
-
+            private TrackInfoComparer m_Comparer = new TrackInfoComparer();
             private PresetStyleSheetRoot m_RootComponent;
-            private Dictionary<string, Dictionary<string, List<(PresetStyleSheet sheet, Preset preset)>>> m_SheetContext;
+            private Dictionary<string, Dictionary<string, List<TrackInfo>>> m_SheetContext;
 
             public PresetSheetContext(PresetStyleSheetRoot sheetRoot)
             {
@@ -265,12 +271,13 @@ namespace PresetStyle
                             _AppendSheet(parent, resultSheets);
                         }
                     }
+
                     resultSheets.Add(sheet);
                 }
 
                 _AppendSheet(sheet, sheetListToApply);
 
-                m_SheetContext = new Dictionary<string, Dictionary<string, List<(PresetStyleSheet sheet, Preset preset)>>>();
+                m_SheetContext = new Dictionary<string, Dictionary<string, List<TrackInfo>>>();
 
                 for (int i = 0; i < sheetListToApply.Count; i++)
                 {
@@ -283,7 +290,7 @@ namespace PresetStyle
 
                         if (!m_SheetContext.TryGetValue(orderedSelector, out var typeToPresetTuple))
                         {
-                            typeToPresetTuple = new Dictionary<string, List<(PresetStyleSheet sheet, Preset preset)>>();
+                            typeToPresetTuple = new Dictionary<string, List<TrackInfo>>();
                             m_SheetContext.Add(orderedSelector, typeToPresetTuple);
                         }
 
@@ -291,10 +298,16 @@ namespace PresetStyle
                         {
                             if (!typeToPresetTuple.TryGetValue(preset.name, out var tupleList))
                             {
-                                tupleList = new List<(PresetStyleSheet sheet, Preset preset)>();
+                                tupleList = new List<TrackInfo>();
                                 typeToPresetTuple.Add(preset.name, tupleList);
                             }
-                            tupleList.Add((currentSheet, preset));
+                            tupleList.Add(new TrackInfo()
+                            {
+                                Match = orderedSelector,
+                                Sheet = sheet,
+                                Preset = preset,
+                                Order = i
+                            });
                         }
                     }
                 }
@@ -313,28 +326,21 @@ namespace PresetStyle
                     if (string.IsNullOrWhiteSpace(selector)) continue;
                     if (!m_SheetContext.TryGetValue(selector, out var presetsDict)) continue;
                     if (!presetsDict.TryGetValue(component.GetType().FullName, out var info)) continue;
-                    var isDirty = false;
                     for (int j = 0; j < info.Count; j++)
                     {
-                        if (!info[j].preset.CanBeAppliedTo(component)) continue;
-                        if (!dry && !isDirty)
-                        {
-                            Undo.RecordObject(component, "Editor");
-                            isDirty = true;
-                        }
-
-                        //if dry, skip actual apply
-                        if (!dry) m_RootComponent.ApplyPreset(component, info[j].sheet, info[j].preset);
-
+                        if (!info[j].Preset.CanBeAppliedTo(component)) continue;
                         //record apply info
-                        result.Add(new TrackInfo()
-                        {
-                            Match = selector,
-                            Sheet = info[j].sheet,
-                            Preset = info[j].preset
-                        });
+                        result.Add(info[j]);
                     }
-                    if (isDirty) EditorUtility.SetDirty(component);
+                }
+
+                result.Sort(m_Comparer);
+
+                if(!dry && result.Count > 0)
+                {
+                    Undo.RecordObject(component, "Editor");
+                    foreach(var info in result) m_RootComponent.ApplyPreset(component, info.Sheet, info.Preset);
+                    EditorUtility.SetDirty(component);
                 }
 
                 //this is to analyze which is actually applied
@@ -346,7 +352,7 @@ namespace PresetStyle
                 _ApplyInternal(go, recursive, new List<string>());
             }
 
-            void _ApplyInternal(GameObject go, bool recursive, List<string> selectorCache)
+            void _ApplyInternal(GameObject go, bool recursive, List<string> selectorCache, List<TrackInfo> infoCache = null)
             {
                 if (go.TryGetComponent<PresetStyleSheetRoot>(out var childRoot) && childRoot != m_RootComponent)
                 {
@@ -357,6 +363,8 @@ namespace PresetStyle
                     }
                     return;
                 }
+
+                if(infoCache == null) infoCache = new List<TrackInfo>();
 
                 if (go.TryGetComponent<PresetStyleClass>(out var subName))
                 {
@@ -371,19 +379,24 @@ namespace PresetStyle
                         foreach (var component in components)
                         {
                             if (!presetsDict.TryGetValue(component.GetType().FullName, out var info)) continue;
-                            var isDirty = false;
+                            infoCache.Clear();
+
                             for (int j = 0; j < info.Count; j++)
                             {
                                 var preset = info[j];
-                                if (!info[j].preset.CanBeAppliedTo(component)) continue;
-                                if (!isDirty)
-                                {
-                                    Undo.RecordObject(component, "Editor");
-                                    isDirty = true;
-                                }
-                                m_RootComponent.ApplyPreset(component, info[j].sheet, info[j].preset);
+                                if (!info[j].Preset.CanBeAppliedTo(component)) continue;
+                                infoCache.Add(info[j]);
+
                             }
-                            if (isDirty) EditorUtility.SetDirty(component);
+
+                            infoCache.Sort(m_Comparer);
+
+                            if(infoCache.Count > 0)
+                            {
+                                Undo.RecordObject(component, "Editor");
+                                foreach(var infoToApply in infoCache) m_RootComponent.ApplyPreset(component, infoToApply.Sheet, infoToApply.Preset);
+                                EditorUtility.SetDirty(component);
+                            }
                         }
                     }
                 }
