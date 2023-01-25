@@ -5,9 +5,9 @@
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
-    <title>Locus Bundle System For Unity | LocusPresetStyle documentation </title>
+    <title>Locus Preset Style For Unity3D | LocusPresetStyle documentation </title>
     <meta name="viewport" content="width=device-width">
-    <meta name="title" content="Locus Bundle System For Unity | LocusPresetStyle documentation ">
+    <meta name="title" content="Locus Preset Style For Unity3D | LocusPresetStyle documentation ">
     <meta name="generator" content="docfx 2.59.4.0">
     
     <link rel="shortcut icon" href="favicon.ico">
@@ -70,27 +70,10 @@
         <div class="article row grid">
           <div class="col-md-10">
             <article class="content wrap" id="_content" data-uid="">
-<h1 id="locus-bundle-system-for-unity">Locus Bundle System For Unity</h1>
+<h1 id="locus-preset-style-for-unity3d">Locus Preset Style For Unity3D</h1>
 
-<p><a href="https://discord.gg/kfVzV7qaEF"><img src="https://img.shields.io/discord/865867751813414933.svg?label=&amp;logo=discord&amp;logoColor=ffffff&amp;color=7389D8&amp;labelColor=6A7EC2" alt="Discord"></a></p>
-<p><a href="https://forum.unity.com/threads/simpler-alternative-to-addressables.820998">Unity Forum Thread</a></p>
-<p>AssetBundle system from unity5 will be obsolute in future.\
-Unity Addressables system provides very flexible implementation that fits on any project.\
-But for my experience, there&#39;s huge learning curve to get into it.\
-And also, there&#39;s no synchronized api which is familier to <strong>Resource.Load</strong> Users.</p>
-<p>So here is my own bundle system that also utilizes Scriptable Build Pipline and it provides synchronized API.</p>
-<p>This is build up to support very common senarios I&#39;ve experienced.\
-But you can extend this on purpose.(just fork and make modifications)</p>
 <p>\
 <strong>Synchronized API Support!</strong></p>
-<p>Main pros of Unity Addressables system is memory management.\
-It unloads bundle according to bundle&#39;s reference count.\
-So you don&#39;t need to call Resources.UnloadUnusedAssets() function which hangs your gameplay.</p>
-<p>Mine support same functionality as well as synchronized api.\
-This is done by caching WWWRequest.\
-Note that caching assetbundles eats some memory(but quite low)</p>
-<p>When a assetbundle&#39;s reference count is zero.\
-It fires another assetbundle request and cache up until assetbundle can be unloaded and swapped.</p>
 <p>\
 <strong>Folder based Bundle &amp; Local Bundles</strong></p>
 <p>Like using Resources folder, you can specify folder that you want to make bundle(there&#39;s no bundle name in each asset).\
@@ -100,8 +83,8 @@ It also can be changed later on by patching.</p>
 <h2 id="introduction-video">Introduction Video</h2>
 <p><a href="http://www.youtube.com/watch?v=49WKJRscDrA" title="Locus Bundle System Intro"><img src="http://img.youtube.com/vi/49WKJRscDrA/0.jpg" alt="Check this out"></a></p>
 <h2 id="how-to-setup">How to Setup</h2>
-<p><strong>Assets -&gt; Create -&gt; Create Bundle Build Setting</strong></p>
-<p>Create AssetBundleSetting ScriptableObject using Context Menu.\
+<p><strong>Assets -&gt; Create -&gt; Preset Style Sheet</strong></p>
+<p>Create Preset Style Sheet ScriptableObject using Context Menu.\
 This object can be anywhere under Assets folder</p>
 <p><strong>Setup Bundle Informations</strong></p>
 <p><img src="https://user-images.githubusercontent.com/6591432/73616925-a527b580-465c-11ea-8c82-b004e3822d98.png" alt="BundleSettingInspector"></p>
