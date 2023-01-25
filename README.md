@@ -1,33 +1,8 @@
-# Locus Bundle System For Unity
-
-[![Discord](https://img.shields.io/discord/865867751813414933.svg?label=&logo=discord&logoColor=ffffff&color=7389D8&labelColor=6A7EC2)](https://discord.gg/kfVzV7qaEF)
-
-[Unity Forum Thread](https://forum.unity.com/threads/simpler-alternative-to-addressables.820998)
-
-AssetBundle system from unity5 will be obsolute in future.\
-Unity Addressables system provides very flexible implementation that fits on any project.\
-But for my experience, there's huge learning curve to get into it.\
-And also, there's no synchronized api which is familier to **Resource.Load** Users.
-
-So here is my own bundle system that also utilizes Scriptable Build Pipline and it provides synchronized API.
-
-This is build up to support very common senarios I've experienced.\
-But you can extend this on purpose.(just fork and make modifications)
+# Locus Preset Style For Unity3D
 
 
 \
 **Synchronized API Support!**
-
-Main pros of Unity Addressables system is memory management.\
-It unloads bundle according to bundle's reference count.\
-So you don't need to call Resources.UnloadUnusedAssets() function which hangs your gameplay.
-
-Mine support same functionality as well as synchronized api.\
-This is done by caching WWWRequest.\
-Note that caching assetbundles eats some memory(but quite low)
-
-When a assetbundle's reference count is zero.\
-It fires another assetbundle request and cache up until assetbundle can be unloaded and swapped.
 
 \
 **Folder based Bundle & Local Bundles**
@@ -44,9 +19,9 @@ It also can be changed later on by patching.
 
 ## How to Setup 
 
-**Assets -> Create -> Create Bundle Build Setting**
+**Assets -> Create -> Preset Style Sheet**
 
-Create AssetBundleSetting ScriptableObject using Context Menu.\
+Create Preset Style Sheet ScriptableObject using Context Menu.\
 This object can be anywhere under Assets folder
 
 **Setup Bundle Informations**
