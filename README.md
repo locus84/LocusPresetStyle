@@ -13,11 +13,11 @@ This GitHub repository is for a Unity3D framework that enables developers to eas
 
 # Installation
 To install, use Unity3D's built-in Package Manager.(or you can add it into manifest.json manually)
-<img width="512" alt="image" src="https://user-images.githubusercontent.com/6591432/215272750-dccb27d4-534b-4a5e-a74f-ca3c3c9851e9.png"><br>
+<img width="355" alt="image" src="https://user-images.githubusercontent.com/6591432/215273128-6dcc707e-8adf-439d-b117-044da3293422.png"><br>
 the git format must be
 ```
 https://github.com/locus84/LocusPresetStyle.git#upm[Release Version String]
-//for example, https://github.com/locus84/LocusPresetStyle.git#upm0.1.4
+//for example, https://github.com/locus84/LocusPresetStyle.git#upm0.1.5
 ```
 
 # Getting Started
