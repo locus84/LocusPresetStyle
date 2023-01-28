@@ -203,7 +203,7 @@ namespace PresetStyle
                 styleRoot = gameObject.GetComponentInParent<PresetStyleSheetRoot>();
             }
             if (styleRoot != null) return true;
-            Debug.LogError($"StyleSheetRoot component is not found in GameObject({gameObject.name})'s parents!");
+            Debug.LogWarning($"StyleSheetRoot component is not found in GameObject({gameObject.name})'s parents!");
             return false;
         }
 
