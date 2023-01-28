@@ -83,6 +83,30 @@
 <li>The framework works only on design time, which means there is no runtime overhead.</li>
 </ul>
 <h1 id="getting-started">Getting Started</h1>
+<ol>
+<li>Create a new <code>PresetStyleSheet</code> scriptable object. This object will serve as the container for your styles.</li>
+<li>In the <code>PresetStyleSheet</code>, define a new selector and drag-and-drop a component to associate it with the selector. </li>
+<li>Modify the component&#39;s preset as desired using the inspector.</li>
+<li>Attach a <code>PresetStyleRoot</code> component to your root gameobject. This component will be responsible for applying the styles to your components.</li>
+<li>In the hierarchy, add new style defines using the context menu option.</li>
+<li>The styles will be automatically applied to the associated components in the scene.</li>
+<li>If you modify the stylesheet after it has been applied, you will need to re-apply the styles using the context menu options: &quot;Apply Preset Style&quot; or &quot;Apply Preset Style Recursive&quot;.</li>
+</ol>
+<h1 id="using-multiple-sheets">Using Multiple Sheets</h1>
+<p>You can use multiple sheets if needed.</p>
+<ol>
+<li>In the <code>PresetStyleSheet</code>, you can add multiple parent sheets. </li>
+<li>Sheets will be applied in order if there&#39;s multiple selector combinations.
+It is important to note that styles in parent sheets will take precedence over styles in child sheets. This allows for flexibility in organizing your styles and making changes to specific subsets of components.</li>
+</ol>
+<h1 id="analyze-styles-applied">Analyze Styles Applied</h1>
+<ol>
+<li>Open the analyzor window using <code>Window &gt; Preset Style &gt; Show Analyzor Window</code>.</li>
+<li>Select one or more gameobjects which you defined styles on.</li>
+<li>Alternatively, you can open the window using the component context menu to track only that specific component.</li>
+</ol>
+<h1 id="beware">Beware</h1>
+<p>The components related this framework will not be saved in build using HideFlags. Do not use it in your code.</p>
 <h2 id="license">License</h2>
 <p><a href="LICENSE.md">MIT</a></p>
 </article>
