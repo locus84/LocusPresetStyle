@@ -30,16 +30,17 @@ namespace PresetStyle
 
             if (inst == null) return;
             var style = inst.GetComponent<PresetStyleClass>();
-            if (style == null) return;
+            if (style == null && !Selection.Contains(inst)) return;
 
             var textRect = rect;
             textRect.width -= 26;
-            EditorGUI.LabelField(textRect, style.Name, s_GUIStyle);
+
+            if(style != null) EditorGUI.LabelField(textRect, style.Name, s_GUIStyle);
 
             var buttonRect = rect;
             buttonRect.x = rect.x + rect.width - 23;
             buttonRect.width = 20;
-            if (GUI.Button(buttonRect, new GUIContent("S", "Edit Preset Style")))
+            if (GUI.Button(buttonRect, new GUIContent(style == null? "A" : "S", "Edit Preset Style")))
             {
                 PresetStyleClassPopup editor = Editor.CreateInstance<PresetStyleClassPopup>();
 
@@ -87,6 +88,7 @@ namespace PresetStyle
 
                 if (!string.IsNullOrWhiteSpace(m_StyleString))
                 {
+                    if(style == null) Undo.AddComponent<PresetStyle.PresetStyleClass>(m_Target);
                     Undo.RecordObject(style, "Editor");
                     style.Name = m_StyleString;
                     PresetStyleUtility.Apply(new[] { style.gameObject });
@@ -94,7 +96,7 @@ namespace PresetStyle
                 }
                 else
                 {
-                    Undo.DestroyObjectImmediate(style);
+                    if(style != null) Undo.DestroyObjectImmediate(style);
                 }
 
                 Close();
