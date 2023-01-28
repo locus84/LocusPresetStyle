@@ -261,18 +261,19 @@ namespace PresetStyle
                 var appliedHash = new HashSet<PresetStyleSheet>();
                 var sheetListToApply = new List<PresetStyleSheet>();
 
-                void _AppendSheet(PresetStyleSheet sheet, List<PresetStyleSheet> resultSheets)
+                void _AppendSheet(PresetStyleSheet sheetToAdd, List<PresetStyleSheet> resultSheets)
                 {
-                    if (sheet.ParentSheets != null)
+                    if (sheetToAdd.ParentSheets != null)
                     {
-                        foreach (var parent in sheet.ParentSheets)
+                        foreach (var parent in sheetToAdd.ParentSheets)
                         {
                             if (parent == null) continue;
                             _AppendSheet(parent, resultSheets);
                         }
                     }
 
-                    resultSheets.Add(sheet);
+                    //skip same sheet
+                    if(!resultSheets.Contains(sheetToAdd)) resultSheets.Add(sheetToAdd);
                 }
 
                 _AppendSheet(sheet, sheetListToApply);
