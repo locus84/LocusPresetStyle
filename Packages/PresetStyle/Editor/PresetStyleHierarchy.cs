@@ -88,7 +88,7 @@ namespace PresetStyle
 
                 if (!string.IsNullOrWhiteSpace(m_StyleString))
                 {
-                    if(style == null) Undo.AddComponent<PresetStyle.PresetStyleClass>(m_Target);
+                    if(style == null) style = Undo.AddComponent<PresetStyle.PresetStyleClass>(m_Target);
                     Undo.RecordObject(style, "Editor");
                     style.Name = m_StyleString;
                     PresetStyleUtility.Apply(new[] { style.gameObject });
