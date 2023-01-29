@@ -203,7 +203,7 @@ namespace PresetStyle
                 styleRoot = gameObject.GetComponentInParent<PresetStyleSheetRoot>();
             }
             if (styleRoot != null) return true;
-            Debug.LogError($"StyleSheetRoot component is not found in GameObject({gameObject.name})'s parents!");
+            Debug.LogWarning($"StyleSheetRoot component is not found in GameObject({gameObject.name})'s parents!");
             return false;
         }
 
@@ -219,11 +219,16 @@ namespace PresetStyle
             return true;
         }
 
-        public static string ReorderSelector(string selector)
+        public static string ReorderSelector(string selector, out int count)
         {
-            if (!selector.Contains(SEPERATOR)) return selector;
+            if (!selector.Contains(SEPERATOR))
+            {
+                count = 1;
+                return selector;
+            } 
             var split = selector.Split(SEPERATOR_CHAR).Select(x => x.Trim())
-                .Where(x => !string.IsNullOrWhiteSpace(x)).OrderBy(x => x);
+                .Where(x => !string.IsNullOrWhiteSpace(x)).OrderBy(x => x).ToArray();
+            count = split.Length;
             return string.Join(SEPERATOR, split);
         }
 
@@ -240,12 +245,12 @@ namespace PresetStyle
             public PresetStyleSheet Sheet;
             public string Match;
             public Preset Preset;
-            public int Order;
+            public int Specificity;
         }
 
         public class TrackInfoComparer : IComparer<TrackInfo>
         {
-            public int Compare(TrackInfo x, TrackInfo y) => x.Order.CompareTo(y.Order);
+            public int Compare(TrackInfo x, TrackInfo y) => x.Specificity.CompareTo(y.Specificity);
         }
 
         public class PresetSheetContext
@@ -259,10 +264,13 @@ namespace PresetStyle
                 m_RootComponent = sheetRoot;
                 var sheet = sheetRoot.Sheet;
                 var appliedHash = new HashSet<PresetStyleSheet>();
-                var sheetListToApply = new List<PresetStyleSheet>();
+                var sheetListToApply = new HashSet<PresetStyleSheet>();
 
-                void _AppendSheet(PresetStyleSheet sheet, List<PresetStyleSheet> resultSheets)
+                void _AppendSheet(PresetStyleSheet sheet, HashSet<PresetStyleSheet> resultSheets)
                 {
+                    //skip already existing sheet
+                    if(!resultSheets.Add(sheet)) return;
+
                     if (sheet.ParentSheets != null)
                     {
                         foreach (var parent in sheet.ParentSheets)
@@ -271,22 +279,19 @@ namespace PresetStyle
                             _AppendSheet(parent, resultSheets);
                         }
                     }
-
-                    resultSheets.Add(sheet);
                 }
 
                 _AppendSheet(sheet, sheetListToApply);
 
                 m_SheetContext = new Dictionary<string, Dictionary<string, List<TrackInfo>>>();
 
-                for (int i = 0; i < sheetListToApply.Count; i++)
+                foreach(var currentSheet in sheetListToApply)
                 {
-                    var currentSheet = sheetListToApply[i];
                     foreach (var style in currentSheet.Styles)
                     {
                         if (string.IsNullOrWhiteSpace(style.Selector)) continue;
 
-                        var orderedSelector = ReorderSelector(style.Selector);
+                        var orderedSelector = ReorderSelector(style.Selector, out var selctorCount);
 
                         if (!m_SheetContext.TryGetValue(orderedSelector, out var typeToPresetTuple))
                         {
@@ -306,7 +311,7 @@ namespace PresetStyle
                                 Match = orderedSelector,
                                 Sheet = sheet,
                                 Preset = preset,
-                                Order = i
+                                Specificity = style.Priority + 10 * selctorCount + 100 * currentSheet.SheetPriority
                             });
                         }
                     }

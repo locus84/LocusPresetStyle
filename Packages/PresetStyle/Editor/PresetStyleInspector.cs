@@ -12,6 +12,7 @@ namespace PresetStyle
     public class PresetStyleSheetInspector : Editor
     {
         SerializedProperty m_ParentList;
+        SerializedProperty m_Specificity;
         ReorderableList m_StyleList;
         bool m_IsAssemblyReloading = false;
         Dictionary<int, Editor> m_CachedEditors = new Dictionary<int, Editor>();
@@ -19,15 +20,31 @@ namespace PresetStyle
         void OnEnable()
         {
             m_ParentList = serializedObject.FindProperty(nameof(PresetStyleSheet.ParentSheets));
+            m_Specificity = serializedObject.FindProperty(nameof(PresetStyleSheet.SheetPriority));
             m_StyleList = new ReorderableList(serializedObject, serializedObject.FindProperty(nameof(PresetStyleSheet.Styles)));
-            m_StyleList.drawHeaderCallback = (Rect rect) => { EditorGUI.LabelField(rect, nameof(PresetStyleSheet.Styles)); };
+            m_StyleList.drawHeaderCallback = (Rect rect) => { 
+                rect.x += 15;
+                rect.width -= 15;
+                rect.width *= 0.4f;
+                EditorGUI.LabelField(rect, nameof(PresetStyleSheet.PresetStyle.Selector));
+                rect.x += rect.width + 5f;
+                rect.width *= (1f - 0.4f)/0.4f;
+                rect.width -= 5f;
+                EditorGUI.LabelField(rect, $"{nameof(PresetStyleSheet.PresetStyle.Priority)} (x1)");
+            };
             m_StyleList.drawElementCallback += (Rect rect, int index, bool isActive, bool isFocused) =>
             {
                 var element = m_StyleList.serializedProperty.GetArrayElementAtIndex(index);
                 rect.y += 1;
                 rect.height -= 2;
-                var selector = m_StyleList.serializedProperty.GetArrayElementAtIndex(index).FindPropertyRelative(nameof(PresetStyleSheet.PresetStyle.Selector));
-                EditorGUI.PropertyField(rect, selector);
+                rect.width *= 0.4f;
+                var selector = element.FindPropertyRelative(nameof(PresetStyleSheet.PresetStyle.Selector));
+                var specificity = element.FindPropertyRelative(nameof(PresetStyleSheet.PresetStyle.Priority));
+                EditorGUI.PropertyField(rect, selector, GUIContent.none);
+                rect.x += rect.width + 5f;
+                rect.width *= (1f - 0.4f)/0.4f;
+                rect.width -= 5f;
+                EditorGUI.PropertyField(rect, specificity, GUIContent.none);
             };
 
             m_StyleList.elementHeightCallback += i => EditorGUIUtility.singleLineHeight + 2;
@@ -83,6 +100,7 @@ namespace PresetStyle
         {
             serializedObject.Update();
             EditorGUILayout.PropertyField(m_ParentList);
+            EditorGUILayout.PropertyField(m_Specificity, new GUIContent($"{nameof(PresetStyleSheet.SheetPriority)} (x100)"));
             m_StyleList.DoLayoutList();
             serializedObject.ApplyModifiedProperties();
 
@@ -189,6 +207,7 @@ namespace PresetStyle
         {
             Event evt = Event.current;
             Rect drop_area = GUILayoutUtility.GetRect(0.0f, 50.0f, GUILayout.ExpandWidth(true));
+            GUI.color = Color.white;
             GUI.Box(drop_area, $"Selector : {selector}\nDrag and drop component(s) here.");
 
             switch (evt.type)
