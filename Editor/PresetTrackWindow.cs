@@ -8,6 +8,7 @@ namespace PresetStyle
     public class PresetTrackWindow : EditorWindow
     {
         private bool m_AutoRefresh = true;
+        private Vector2 m_ScrollPosition;
         Dictionary<Component, List<TrackInfo>> m_TrackInfos;
 
         public void SetTrackInfos(Dictionary<Component, List<TrackInfo>> trackInfos)
@@ -49,7 +50,13 @@ namespace PresetStyle
             if(m_AutoRefresh) CollectTrackInfos();
 
             if(m_TrackInfos == null || m_TrackInfos.Count == 0) return;
-
+            
+            GUILayout.BeginHorizontal();
+            EditorGUILayout.LabelField($"{nameof(PresetStyleSheet.PresetStyle.Priority)} - {nameof(TrackInfo.Match)}", GUILayout.MinWidth(10));
+            EditorGUILayout.LabelField($"{typeof(PresetStyleSheet).Name}", GUILayout.MinWidth(10));
+            EditorGUILayout.LabelField($"{nameof(PresetStyleSheet.PresetStyle.Presets)}", GUILayout.MinWidth(10));
+            GUILayout.EndHorizontal();
+            m_ScrollPosition = GUILayout.BeginScrollView(m_ScrollPosition);
             foreach(var trackInfo in m_TrackInfos)
             {
                 EditorGUILayout.Separator();
@@ -58,12 +65,13 @@ namespace PresetStyle
                 {
                     var info = trackInfo.Value[i];
                     GUILayout.BeginHorizontal();
-                    EditorGUILayout.LabelField($"{info.Order} - {nameof(TrackInfo.Match)} : {info.Match}", GUILayout.MinWidth(10));
+                    EditorGUILayout.LabelField($"{info.Specificity} - {nameof(TrackInfo.Match)} : {info.Match}", GUILayout.MinWidth(10));
                     EditorGUILayout.ObjectField(info.Sheet, info.Sheet.GetType(), false);
                     EditorGUILayout.ObjectField(info.Preset, info.Preset.GetType(), false);
                     GUILayout.EndHorizontal();
                 }
             }
+            GUILayout.EndScrollView();
         }
     }
 }
