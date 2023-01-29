@@ -26,9 +26,9 @@ namespace PresetStyle
 
         public void CollectSelectors(List<string> results, HashSet<PresetStyleSheet> processed = null)
         {
+            if(processed == null) processed = new HashSet<PresetStyleSheet>();
             if(!processed.Add(this)) return;
             foreach(var style in Styles) results.Add(style.Selector);
-            if(processed == null) processed = new HashSet<PresetStyleSheet>();
             foreach(var parents in ParentSheets) parents.CollectSelectors(results, processed);
         }
 #endif
