@@ -114,7 +114,7 @@ Preset:
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: m_FontData.m_VerticalOverflow
-    value: 1
+    value: 0
     objectReference: {fileID: 0}
   - target: {fileID: 0}
     propertyPath: m_FontData.m_LineSpacing
@@ -434,20 +434,26 @@ MonoBehaviour:
   m_Name: Texts
   m_EditorClassIdentifier: 
   ParentSheets: []
+  SheetPriority: 0
   Styles:
   - Selector: text
+    Priority: 0
     Presets:
     - {fileID: -4553237990047535928}
   - Selector: text.big
+    Priority: 0
     Presets:
     - {fileID: 1438310662562713893}
   - Selector: text.small
+    Priority: 0
     Presets:
     - {fileID: 5548852256713618752}
   - Selector: text.center
+    Priority: 0
     Presets:
     - {fileID: -618642144001375259}
   - Selector: text.white
+    Priority: 0
     Presets:
     - {fileID: -108934225745180413}
 --- !u!181963792 &1438310662562713893

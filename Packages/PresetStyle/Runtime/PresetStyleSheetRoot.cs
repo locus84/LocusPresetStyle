@@ -11,7 +11,7 @@ namespace PresetStyle
         void OnValidate() => hideFlags = HideFlags.DontSaveInBuild;
 
 #if UNITY_EDITOR
-        public static System.Action<GameObject> ApplyRecursive = null; 
+        public static System.Action<PresetStyleSheetRoot> ApplyRecursive = null; 
 
         public PresetStyleSheet Sheet;
         public bool AutoApply = false;
@@ -28,7 +28,7 @@ namespace PresetStyle
             //means in prefab mode
             var isPersistant = UnityEditor.EditorUtility.IsPersistent(this);
             var parentRefresh = GetComponentsInParent<PresetStyleSheetRoot>().Any(sheet => sheet != this && sheet.AutoApply);
-            if ((isPrefabMode || !isPersistant) && !parentRefresh) ApplyRecursive?.Invoke(gameObject);
+            if ((isPrefabMode || !isPersistant) && !parentRefresh) ApplyRecursive?.Invoke(this);
         }
 
         public virtual void ApplyPreset(Component component, PresetStyleSheet originSheet, UnityEditor.Presets.Preset preset)

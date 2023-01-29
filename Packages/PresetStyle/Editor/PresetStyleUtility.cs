@@ -14,7 +14,7 @@ namespace PresetStyle
         [InitializeOnLoadMethod]
         static void InitializeCallback()
         {
-            PresetStyleSheetRoot.ApplyRecursive = go => ApplyRecursive(new [] { go });
+            PresetStyleSheetRoot.ApplyRecursive = root => new PresetSheetContext(root).Apply(root.gameObject, true);
         }
 
         public const string SEPERATOR = ".";
@@ -32,7 +32,11 @@ namespace PresetStyle
         public static void ApplyComponent(MenuCommand command)
         {
             var component = command.context as Component;
-            if (!TryGetParentStyleSheetRoot(component.gameObject, out var styleRoot)) return;
+            if (!TryGetParentStyleSheetRoot(component.gameObject, out var styleRoot)) 
+            {
+                Debug.LogWarning($"StyleSheetRoot component is not found in GameObject({component.gameObject.name})'s parents!");
+                return;
+            }
             var context = new PresetSheetContext(styleRoot);
             context.Apply(component);
         }
@@ -48,7 +52,11 @@ namespace PresetStyle
         public static void AnalyzeComponent(MenuCommand command)
         {
             var component = command.context as Component;
-            if (!TryGetParentStyleSheetRoot(component.gameObject, out var styleRoot)) return;
+            if (!TryGetParentStyleSheetRoot(component.gameObject, out var styleRoot))    
+            {
+                Debug.LogWarning($"StyleSheetRoot component is not found in GameObject({component.gameObject.name})'s parents!");
+                return;
+            }
             var context = new PresetSheetContext(styleRoot);
             var trackInfos = context.Apply(component, true);
             var result = new Dictionary<Component, List<TrackInfo>>();
@@ -139,11 +147,23 @@ namespace PresetStyle
 
         public static void ApplyRecursive(IEnumerable<GameObject> gameObjects)
         {
-            foreach (var go in gameObjects)
+            var styles = new HashSet<PresetStyleClass>();
+            
+            foreach (var go in gameObjects) styles.UnionWith(go.GetComponentsInChildren<PresetStyleClass>(true));
+
+            var contextDict = new Dictionary<PresetStyleSheetRoot, PresetSheetContext>();
+
+            foreach(var style in styles)
             {
-                if (!TryGetParentStyleSheetRoot(go, out var styleRoot)) continue;
-                var context = new PresetSheetContext(styleRoot);
-                context.Apply(go, true);
+                if (!TryGetParentStyleSheetRoot(style.gameObject, out var styleRoot)) continue;
+                
+                if(!contextDict.TryGetValue(styleRoot, out var context))
+                {
+                    context = new PresetSheetContext(styleRoot);
+                    contextDict.Add(styleRoot, context);
+                }
+                
+                context.Apply(style.gameObject, false);
             }
         }
 
@@ -178,7 +198,12 @@ namespace PresetStyle
             {
                 var style = go.GetComponent<PresetStyleClass>();
                 if(style == null) continue;
-                if (!TryGetParentStyleSheetRoot(go, out var styleRoot)) continue;
+                if (!TryGetParentStyleSheetRoot(go, out var styleRoot)) 
+                {
+                    Debug.LogWarning($"StyleSheetRoot component is not found in GameObject({go.name})'s parents!");
+                    continue;
+                }
+                
                 var context = new PresetSheetContext(styleRoot);
                 foreach(var component in go.GetComponents<Component>())
                 {
@@ -203,7 +228,6 @@ namespace PresetStyle
                 styleRoot = gameObject.GetComponentInParent<PresetStyleSheetRoot>();
             }
             if (styleRoot != null) return true;
-            Debug.LogWarning($"StyleSheetRoot component is not found in GameObject({gameObject.name})'s parents!");
             return false;
         }
 
