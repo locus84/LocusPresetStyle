@@ -29,6 +29,8 @@ namespace PresetStyle
                 var context = new PresetStyleUtility.PresetSheetContext(styleRoot);
                 foreach(var component in go.GetComponents<Component>())
                 {
+                    //there can be missing script
+                    if(component == null) continue;
                     var trackInfos = context.Apply(component, true);
                     if(trackInfos.Count == 0) continue;
                     result.Add(component, trackInfos);
