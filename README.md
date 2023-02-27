@@ -31,7 +31,7 @@ https://github.com/locus84/LocusPresetStyle.git#upm[Release Version String]
 4. Attach a `PresetStyleSheetRoot` component to your root gameobject. This component will be responsible for applying the styles to your components.
 <img width="651" alt="image" src="https://user-images.githubusercontent.com/6591432/215271974-ed9aabae-e406-447d-96bb-449d5dc1ffae.png">
 
-5. In the hierarchy, add new style defines by pressing "A" button, or using the context menu option.
+5. In the hierarchy, add/modify style by pressing "s" key(shortcut) or pressing "A" button. You can do this by using context menu, too.
 <img width="593" alt="image" src="https://user-images.githubusercontent.com/6591432/215272011-7ae12128-b4c2-4f97-8558-cb49060b8e1b.png">
 
 6. The styles will be automatically applied to the associated components in the scene.
