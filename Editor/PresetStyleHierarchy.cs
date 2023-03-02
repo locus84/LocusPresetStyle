@@ -41,7 +41,13 @@ namespace PresetStyle
             buttonRect.x = rect.x + rect.width - 23;
             buttonRect.width = 20;
             var isActive = inst.gameObject == Selection.activeGameObject;
-            var keyClicked = isActive && Event.current.modifiers == EventModifiers.None && Event.current.type == EventType.KeyUp && Event.current.keyCode == KeyCode.S;
+
+            var keyClicked = isActive && 
+                string.IsNullOrWhiteSpace(GUI.GetNameOfFocusedControl()) &&
+                Event.current.modifiers == EventModifiers.None && 
+                Event.current.type == EventType.KeyUp && 
+                Event.current.keyCode == KeyCode.S;
+                
             if (keyClicked || GUI.Button(buttonRect, new GUIContent(style == null? "A" : "S", style == null? "Add Preset Style" : "Edit Preset Style")))
             {
                 PresetStyleClassPopup editor = Editor.CreateInstance<PresetStyleClassPopup>();
