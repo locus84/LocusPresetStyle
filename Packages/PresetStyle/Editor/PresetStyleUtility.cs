@@ -4,6 +4,7 @@ using UnityEditor.Presets;
 using System.Collections.Generic;
 using System.Linq;
 using System;
+using System.Reflection;
 
 namespace PresetStyle
 {
@@ -65,6 +66,59 @@ namespace PresetStyle
             var trackEditor = EditorWindow.GetWindow<PresetTrackWindow>("Preset Style Analyzer");
             trackEditor.SetTrackInfos(result);
             trackEditor.Show();
+        }
+
+        
+        [MenuItem("CONTEXT/Component/Overwrite Preset Style", true, EDITOR_ORDER)]
+        public static bool OverrideComponentValidation(MenuCommand command)
+        {
+            var component = command.context as Component;
+
+            //must be a presetstyle
+            if (component == null || component.GetComponent<PresetStyleClass>() == null) return false;
+
+            //must be a root
+            if (!PresetStyleUtility.TryGetParentStyleSheetRoot(component.gameObject, out var styleRoot)) return false;
+            var context = new PresetStyleUtility.PresetSheetContext(styleRoot);
+            var trackInfos = context.Apply(component, true);
+            return trackInfos.Count > 0;
+        }
+        
+        [MenuItem("CONTEXT/Component/Overwrite Preset Style", false, EDITOR_ORDER)]
+        public static void OverrideComponent(MenuCommand command)
+        {
+            var field = typeof ( Event ).GetField ( "s_Current", BindingFlags.Static | BindingFlags.NonPublic );
+            Event current = field.GetValue(null) as Event;
+            if (current == null) return;
+            var position = current.mousePosition;
+
+            var component = command.context as Component;
+
+            //must be a root
+            PresetStyleUtility.TryGetParentStyleSheetRoot(component.gameObject, out var styleRoot);
+            var context = new PresetStyleUtility.PresetSheetContext(styleRoot);
+            var trackInfos = context.Apply(component, true);
+
+            var selections = trackInfos.Select(info => new GUIContent($"{info.Match}({info.Sheet.name})")).ToArray();
+            
+            EditorUtility.DisplayCustomMenu(new Rect(position.x, position.y, 0, 0), selections, -1, (userdata, options, selected) => {
+                if(selected >= 0)
+                {
+                    var info = trackInfos[selected];
+                    Debug.Log(ReplacePreset(info, component));
+
+                    // var testPreset = AssetDatabase.LoadAssetAtPath<Preset>("Assets/Sample/GettingStarted/Text.preset");
+                    // Undo.RegisterCompleteObjectUndo(testPreset, "Editor");
+                    // Debug.Log(testPreset.UpdateProperties(component));
+                    // Undo.RecordObject(info.Preset, "Editor");
+                    // var mod = info.Preset.PropertyModifications;
+                    
+
+                    // EditorUtility.SetDirty(info.Preset);
+                    // EditorUtility.SetDirty(info.Sheet);
+                } 
+            }, null );
+            return;
         }
 
         [MenuItem("GameObject/Preset Style/Add Preset Style", true, EDITOR_ORDER)]
@@ -263,10 +317,27 @@ namespace PresetStyle
             var split = selector.Split(SEPERATOR_CHAR).Skip(skipCount).Select(x => x.Trim()).Where(x => !string.IsNullOrWhiteSpace(x)).OrderBy(x => x).ToArray();
             result.AddRange(Enumerable.Range(0, 1 << split.Length).Select(index => string.Join(PresetStyleUtility.SEPERATOR, split.Where((v, i) => (index & (1 << i)) != 0))));
         }
+        
+        public static bool ReplacePreset(TrackInfo info, Component to)
+        {
+            if(!info.Preset.CanBeAppliedTo(to)) return false;
+            var index = info.Style.Presets.FindIndex(p => info.Preset);
+            if(index < 0) return false;
+
+            var newPreset = new Preset(to);
+            newPreset.name = to.GetType().FullName;
+            newPreset.excludedProperties = info.Preset.excludedProperties;
+            Undo.DestroyObjectImmediate(info.Style.Presets[index]);
+            info.Style.Presets[index] = newPreset;
+            AssetDatabase.AddObjectToAsset(newPreset, info.Sheet);
+            Undo.RegisterCreatedObjectUndo(newPreset, "Editor");
+            return true;
+        }
 
         public struct TrackInfo
         {
             public PresetStyleSheet Sheet;
+            public PresetStyleSheet.PresetStyle Style;
             public string Match;
             public Preset Preset;
             public int Specificity;
@@ -333,7 +404,8 @@ namespace PresetStyle
                             tupleList.Add(new TrackInfo()
                             {
                                 Match = orderedSelector,
-                                Sheet = sheet,
+                                Style = style,
+                                Sheet = currentSheet,
                                 Preset = preset,
                                 Specificity = style.Priority + 10 * selctorCount + 100 * currentSheet.SheetPriority
                             });
